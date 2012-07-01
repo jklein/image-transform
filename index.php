@@ -140,25 +140,32 @@ if (!empty($_POST['submit'])) {
         }
 
         // Now that we have the image on disk let's open it up, transform it, and write it back with a new name
-        $image = new Imagick($path_to_image);
-        $processed_image = $image->clone();
+        // Wrap this in a try/catch since sometimes sites have malformed images that ImageMagick can't open
+        try {
+          $image = new Imagick($path_to_image);
+          $processed_image = $image->clone();
 
-        // Do the filter based on what was passed in
-        if ($filter === 'flipx') {
-          $processed_image->flipImage();
-        } elseif ($filter === 'flipy') {
-          $processed_image->flopImage();
-        } elseif ($filter === 'blur') {
-          $processed_image->blurImage(5, 3);
-        } elseif ($filter === 'gray') {
-          $processed_image->modulateImage(100, 0, 100);
+          // Do the filter based on what was passed in
+          if ($filter === 'flipx') {
+            $processed_image->flipImage();
+          } elseif ($filter === 'flipy') {
+            $processed_image->flopImage();
+          } elseif ($filter === 'blur') {
+            $processed_image->blurImage(5, 3);
+          } elseif ($filter === 'gray') {
+            $processed_image->modulateImage(100, 0, 100);
+          }
+
+          // Write the image out
+          $processed_image->writeImage($folder_path . '/' . $image_file_name . '_processed' . $image_extension);
+
+          // Populate our image array with the path to both the old and new images
+          $image_element->src = '/' . $folder_name . '/' . $image_file_name . '_processed' . $image_extension;
+        } catch (Exception $e) {
+          error_log($e);
         }
 
-        // Write the image out
-        $processed_image->writeImage($folder_path . '/' . $image_file_name . '_processed' . $image_extension);
 
-        // Populate our image array with the path to both the old and new images
-        $image_element->src = '/' . $folder_name . '/' . $image_file_name . '_processed' . $image_extension;
       }
 
       // Write the HTML to disk to cache this request
