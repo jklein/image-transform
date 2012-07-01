@@ -13,6 +13,7 @@ Requirements
 * php-curl
 * php-imagick
 * PHP Simple HTML DOM Parser (included in the repo)
+* ImageMagick
 * Apache 2
 
 
