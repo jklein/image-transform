@@ -25,7 +25,7 @@ if (!empty($_POST['submit'])) {
     $errors['url'] = 'Please enter a valid URL of the form http://www.example.org';
   }
 
-  // Make sure they selected a transformation (or more than one)
+  // Make sure they selected a transformation
   if (empty($_POST['transformation'])) {
     $errors['transformation'] = 'Please select a transformation you want to do on the images in the specified URL';
   }
@@ -124,16 +124,63 @@ if (!empty($_POST['submit'])) {
   <head>
     <title>Image Filtering</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.5.1/build/cssreset/cssreset-min.css">
+    <style>
+      body {
+        font-family:helvetica,sans-serif,arial;
+        font-size:14px;
+      }
+
+      .header_form {
+        padding:10px;
+        font-size: 18px;
+        text-align: center;
+        background:#019AC4;
+        background:-webkit-radial-gradient(circle,#3BC3E5,#019AC4);
+        background:-moz-radial-gradient(circle,#3BC3E5,#019AC4);
+        background:-ms-radial-gradient(circle,#3BC3E5,#019AC4);
+        border-top:1px solid #5EBFD9;
+        border-bottom:1px solid #999;
+        color:white;
+        background-position: fixed;
+      }
+
+      input[type="submit"] {
+        border-radius: 5px;
+        padding:3px;
+        background:#63BB4A;
+        background:-webkit-gradient(linear,0% 0%,0% 100%,color-stop(0%,#83C96F),color-stop(50%,#63BB4A),color-stop(100%,#4E9939));
+        background:-moz-linear-gradient(top,#83C96F 0%,#63BB4A 50%,#4E9939 100%);
+        background:linear-gradient(top,#83C96F 0%,#63BB4A 50%,#4E9939 100%);
+        color:white;
+        border-width: 1px;
+        border-color:#3B742B;
+        border-left-color: #63BB4A;
+        border-top-color: #63BB4A;
+        border-right:1px solid #3B742B;
+        border-bottom:1px solid #3B742B;
+      }
+
+      .url {
+        margin-right:25px;
+      }
+    </style>
   </head>
   <body>
-    <form method="post" action="<?=$_SERVER['SCRIPT_NAME'];?>">
-      <input type="url" value="" name="url" placeholder="URL Here" />
-      <select name="transformation" multiple="multiple">
-        <option value="flip">Flip along x-axis (vertical flip)</option>
-        <option value="gray">Convert Images to grayscale</option>
-      </select>
-      <input type="submit" value="submit" name="submit" />
-    </form>
+    <div class="header_form">
+      <form method="post" action="<?=$_SERVER['SCRIPT_NAME'];?>">
+        URL To Fetch:
+        <input type="url" value="" name="url" placeholder="http://www.example.org" class="url" />
+
+        Transformation to Perform:
+        <select name="transformation">
+          <option value="flip">Flip along x-axis (vertical flip)</option>
+          <option value="gray">Convert Images to grayscale</option>
+        </select>
+        <input type="submit" value="submit" name="submit" />
+      </form>
+    </div>
 
     <?=$html;?>
   </body>
