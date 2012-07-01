@@ -1,6 +1,7 @@
 <?php
 /**
- * Torbit Programming Test - Image manipulation on remote URL
+ * This page allows you specify a URL and one of the allowed image transforms, and it will then
+ * fetch that URL and perform the transformation on every image on the page in an <img> tag
  *
  * PHP version 5
  *
