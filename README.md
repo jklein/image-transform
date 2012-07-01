@@ -6,6 +6,15 @@ This is a small tool that allows you to perform Image Magick filters on all imag
 There is a pretty trivial caching system in place, if you hit the same URL with the same filter you will get a cached HTML page and you will use images that have already been filtered.
 
 
+===============
+Requirements
+===============
+* PHP 5.3+ (could work with older versions, but they were not tested)
+* php-curl
+* php-imagick
+* PHP Simple HTML DOM Parser (included in the repo)
+* Apache 2
+
 
 ===============
 Known Issues
@@ -35,3 +44,4 @@ Features to Add
 * HTTP Auth
 * Allow people to bypass the cache if they want
 * It would be cool to add support for arbitrary filters, so if the user knew the syntax for the PHP Imagick plugin they could just type any filter they wanted in.
+* I would also like to refactor the code slightly so that adding a new filter would only require a 1-2 line code change in one place.  This might make things a little less readable, but it would be easier to update in the future.

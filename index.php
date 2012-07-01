@@ -5,7 +5,7 @@
  *
  * PHP version 5
  *
- * @author     Jonathan Klein <jonathan.n.klein@gmail.com>
+ * @author Jonathan Klein <jonathan.n.klein@gmail.com>
  */
 
 // Include a library for parsing a DOM tree (from http://simplehtmldom.sourceforge.net/)
@@ -36,15 +36,15 @@ if (!empty($_POST['submit'])) {
     $errors['filter'] = 'Please select a filter you want to do on the images in the specified URL';
   }
 
-  // If we don't have any errors then let's fetch the URL and do the filter
+  // If we don't have any errors then let's fetch the URL and apply the filter
   if (empty($errors)) {
 
-    // set URL and other appropriate options
+    // Move the post params into local variables, in case we want to sanitize down the road, or change the name of the form field
     $url = $_POST['url'];
     $filter = $_POST['filter'];
 
     // Make a directory for this URL and filter (if it doesn't already exist) that will contain the images we download
-    // I'm hashing it to keep the length consistent, and also to easily take care of special characters in the URL
+    // I'm hashing it to keep the length consistent, and also to easily take care of any special characters in the URL
     $folder_name = md5($url . $filter);
     $folder_path = '/var/www/' . $folder_name;
     if (!file_exists($folder_path)) {
@@ -63,7 +63,6 @@ if (!empty($_POST['submit'])) {
         $element->href = '';
       }
 
-
       // Find all of the images on the page and process them
       foreach ($html->find('img') as $image_element) {
 
@@ -78,7 +77,7 @@ if (!empty($_POST['submit'])) {
           $url_to_curl = $image_element->src;
         }
 
-        // Curl the image so we can write it to disk and run some Image Magick commands against it
+        // Curl the image so we can write it to disk and run some ImageMagick commands against it
         $ch = curl_init($url_to_curl);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -227,7 +226,7 @@ if (!empty($_POST['submit'])) {
             Flip along y-axis (horizontal flip)
           </option>
           <option value="blur" <?=($filter == 'blur' ? 'selected' : '');?>>
-            Blur the images
+            Blur images
           </option>
           <option value="gray" <?=($filter == 'gray' ? 'selected' : '');?>>
             Convert images to grayscale
