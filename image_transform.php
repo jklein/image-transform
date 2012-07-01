@@ -15,6 +15,7 @@ include('simple_html_dom.php');
 $errors = array();
 $img_src_array = array();
 $html = '';
+$allowed_img_extentions = array('.jpg', '.png', '.gif');
 
 // See if the user has submitted the page
 if (!empty($_POST['submit'])) {
@@ -37,10 +38,10 @@ if (!empty($_POST['submit'])) {
 		$url = 'http://www.wayfair.com/';
 
 		// Make a directory for this hostname (if it doesn't already exist) that will contain the images we download
-		$folder_name = str_replace(parse_url($url, PHP_URL_HOST), '.', '');
-		$full_path = '/var/www/' . $folder_name;
-		if (!file_exists($full_path)) {
-			mkdir($full_path);
+		$folder_name = str_replace('.', '', parse_url($url, PHP_URL_HOST));
+		$folder_path = '/var/www/' . $folder_name;
+		if (!file_exists($folder_path)) {
+			mkdir($folder_path);
 		}
 
 		// Get the HTML from the URL (this function is from simple_html_dom.php)
@@ -48,7 +49,7 @@ if (!empty($_POST['submit'])) {
 
 		// Find all of the images on the page and process them
 		foreach ($html->find('img') as $image_element) {
-			echo 'image src:' . $image_element->src . '<br/>';
+			//echo 'image src:' . $image_element->src . '<br/>';
 
 			// See if we are dealing with a relative image path
 			if (substr($image_element->src, 0, 4) !== 'http') {
@@ -62,9 +63,9 @@ if (!empty($_POST['submit'])) {
 			}
 
 
-			// Curl the image so we can write it to disk and run some Image Magick commands against it
-			echo 'curling url:' . $url_to_curl . '<br/>';
+			//echo 'curling url:' . $url_to_curl . '<br/>';
 
+			// Curl the image so we can write it to disk and run some Image Magick commands against it
 			$ch = curl_init($url_to_curl);
 			curl_setopt($ch, CURLOPT_HEADER, 0);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -76,9 +77,17 @@ if (!empty($_POST['submit'])) {
 			// This solves the case of images with the same name but with different paths
 			$image_file_name = md5($url_to_curl);
 			$image_extension = substr($url_to_curl, strrpos($url_to_curl, '.'));
-			$path_to_image = $full_path . $image_file_name . $image_extension;
 
-			echo 'path to image:' . $path_to_image . '<br/>';
+			// If the image extension isn't one of the allowed ones we will just go to the next iteration in the loop
+			// This prevents things like beacons from being transformed
+			if (!in_array($image_extension, $allowed_img_extentions)) {
+				continue;
+			}
+
+			// Create the path that we are going to write the image to
+			$path_to_image = $folder_path . '/' . $image_file_name . $image_extension;
+
+			//echo 'path to image:' . $path_to_image . '<br/>';
 
 			if (!file_exists($path_to_image)) {
 				$fp = fopen($path_to_image,'x');
@@ -88,9 +97,9 @@ if (!empty($_POST['submit'])) {
 
 			// Now that we have the image on disk let's open it up, transform it, and write it back with a new name
 			$image = new Imagick($path_to_image);
-			$reflection = $image->clone();
-			$reflection->flipImage();
-			$reflection->writeImage($full_path . $image_file_name . '_processed' . $image_extension);
+			$processed_image = $image->clone();
+			$processed_image->flipImage();
+			$processed_image->writeImage($folder_path . '/' . $image_file_name . '_processed' . $image_extension);
 
 			// Populate our image array with the path to both the old and new image
 			$img_src_array[$image_element->src] = '/' . $folder_name . '/' . $image_file_name . '_processed' . $image_extension;
@@ -100,7 +109,7 @@ if (!empty($_POST['submit'])) {
     // At this point we should have all of the images downloaded, processed, and writted to disk.
     // Now we just need to replace the source attributes in the HTML with the paths to the new images we have created:
     foreach ($img_src_array as $old_src => $new_src) {
-    	str_replace($old_src, $new_src, $html);
+    	$html = str_replace($old_src, $new_src, $html);
     }
 
 	} else {
@@ -108,17 +117,6 @@ if (!empty($_POST['submit'])) {
 	}
 }
 
-
-echo '<pre>';
-print_r($img_src_array);
-echo '</pre>';
-
-/*
-$image = new Imagick('source.png');
-$reflection = $image->clone();
-$reflection->flipImage();
-$reflection->writeImage('dest.png');
-*/
 ?>
 
 <DOCTYPE html>
