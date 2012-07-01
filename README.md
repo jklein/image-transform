@@ -25,6 +25,7 @@ KNOWN ISSUES
 NEED TO LOOK INTO
 ===============
 * If a path to an image is specified as ../../foo.jpg and we are already in a nested directory my script will likely fail
+* Need to explicitly test all of the flavors of relative URLs
 
 
 ===============
