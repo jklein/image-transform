@@ -27,7 +27,7 @@ Known Issues
 * This will not work for data URIs
 * This is probably the least secure application I have ever written.  There are TONS of security vulnerabilities
 * As more URLs get hit I never clean up the disk, so we will get a proliferation of folders over time
-* This is intentionally not MVC, I wanted to keep everything in one file for ease of review
+* This is intentionally not MVC, I wanted to keep everything in one file for ease of review.
 * In a similar vein, this is why I inlined the CSS, and why I am just including the YUI3 reset file with a link tag.  I know this isn't the best practice from a performance point of view, but I wanted to keep the code as easy to review as possible.
 * Because the HTML from the page being curled is simply echoed to the screen, the page inherits whatever CSS that URL has, which can negatively impact the layout of the header that I created.
 * The favicon gets screwed up because of browser caching and the favicon tags in the source documents that we are curling
@@ -43,3 +43,4 @@ Features to Add
 * Allow people to bypass the cache if they want
 * It would be cool to add support for arbitrary filters, so if the user knew the syntax for the PHP Imagick plugin they could just type any filter they wanted in.
 * I would also like to refactor the code slightly so that adding a new filter would only require a 1-2 line code change in one place.  This might make things a little less readable, but it would be easier to update in the future.
+* It would be nice to support URLs of the form "www.example.org", i.e. without the protocol.  Would be easy to add, I just haven't done it yet
