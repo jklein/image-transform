@@ -19,7 +19,7 @@ $img_src_array = array();
 $url = '';
 $html = '';
 $cache_hit = false;
-$allowed_img_extentions = array('.jpg', '.png', '.gif');
+$allowed_img_extentions = array('.jpg', '.jpeg', '.png', '.gif');
 
 // See if the user has submitted the page
 if (!empty($_POST['submit'])) {
@@ -43,6 +43,7 @@ if (!empty($_POST['submit'])) {
 
     // Make a directory for this hostname (if it doesn't already exist) that will contain the images we download
     $folder_name = str_replace('.', '', parse_url($url, PHP_URL_HOST)) . '_' . $_POST['filter'];
+    $folder_name = md5($url . $_POST['filter']);
     $folder_path = '/var/www/' . $folder_name;
     if (!file_exists($folder_path)) {
       mkdir($folder_path);
@@ -220,7 +221,7 @@ if (!empty($_POST['submit'])) {
             Blur the images
           </option>
           <option value="gray" <?=($_POST['filter'] == 'gray' ? 'selected' : '');?>>
-            Convert Images to grayscale
+            Convert images to grayscale
           </option>
         </select>
         <input type="submit" value="submit" name="submit" />

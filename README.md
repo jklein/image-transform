@@ -12,21 +12,25 @@ KNOWN ISSUES
 ===============
 * Encoding can get a little screwed up if special characters exist.  Since I am serving the document as UTF-8, if the source page has a different encoding we can get into trouble.
 * The method of curling the images is pretty slow, I could definitely parallelize this.
-* If a path to an image is specified as ../../foo.jpg and we are already in a nested directory my script will likely fail
-* The script currently only supports three file types
-* I need to verify that input that is deeper in the directory tree (like www.example.com/foo/bar) works
+* The script currently only supports three file types (but they are the most common by far)
 * This only works for <img> tags, not CSS background images or images fetched by JS
 * This will not work for data URIs
 * This is probably the least secure application I have ever written.  There are TONS of security vulnerabilities
 * As more URLs get hit I never clean up the disk, so we will get a proliferation of folders over time
 * This is intentionally not MVC, I wanted to keep everything in one file for ease of review
 * In a similar vein, this is why I inlined the CSS, and why I am just including the YUI3 reset file with a link tag.  I know this isn't the best practice from a performance point of view, but I wanted to keep the code as easy to review as possible.
-* If you hit a subdirectory you will hit cache, need to fix
+
+
+===============
+NEED TO LOOK INTO
+===============
+* If a path to an image is specified as ../../foo.jpg and we are already in a nested directory my script will likely fail
 
 
 ===============
 FEATURES TO ADD
 ===============
-* Make the call with Ajax and show a busy indicator on the page with a "processing..." message or somethign
+* Make the call with Ajax and show a busy indicator on the page with a "processing..." message or something
 * HTTP Auth
 * Allow people to bypass the cache if they want
+* It would be cool to add support for arbitrary filters, so if the user knew the syntax for the PHP Imagick plugin they could just type any filter they wanted in.
