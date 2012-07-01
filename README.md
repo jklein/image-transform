@@ -1,9 +1,9 @@
 ===============
 Overview
 ===============
-This is a small tool that allows you to perform Image Magick filters on all images in a specified URL.  When the URL is submitted, I parse the DOM using Simple HTML DOM, a PHP class that I got from http://simplehtmldom.sourceforge.net/.  Then I cURL all of the images individually, write them to disk, run the filter on them, and rewrite the HTML source of the URL to reference the local images.
+This is a small tool that allows you to apply an ImageMagick filter to all images on a specified web page.  When the URL is submitted, the page parses the DOM using Simple HTML DOM, a PHP class that I got from http://simplehtmldom.sourceforge.net/.  Then it curls all of the images individually, writes them to disk, runs the filter on them, and rewrites the HTML source of the URL to reference the local images.
 
-There is a pretty trivial caching system in place, if you hit the same URL with the same filter you will get a cached HTML page and you will use images that have already been filtered.
+There is a pretty trivial caching system in place - if you hit the same URL with the same filter you will get a cached HTML page and you will use images that have already been filtered.
 
 
 ===============
@@ -29,13 +29,10 @@ Known Issues
 * As more URLs get hit I never clean up the disk, so we will get a proliferation of folders over time
 * This is intentionally not MVC, I wanted to keep everything in one file for ease of review
 * In a similar vein, this is why I inlined the CSS, and why I am just including the YUI3 reset file with a link tag.  I know this isn't the best practice from a performance point of view, but I wanted to keep the code as easy to review as possible.
+* Because the HTML from the page being curled is simply echoed to the screen, the page inherits whatever CSS that URL has, which can negatively impact the layout of the header that I created.
+* The favicon gets screwed up because of browser caching and the favicon tags in the source documents that we are curling
+* If the JS is referenced from a relative URL then we will lose it in the processed page. I fixed this issue for CSS, but I am intentionally skipping it for JS.  Hey, it should make the page faster :-).
 
-
-===============
-Need to Look Into
-===============
-* If a path to an image is specified as ../../foo.jpg and we are already in a nested directory my script will likely fail
-* Need to explicitly test all of the flavors of relative URLs
 
 
 ===============

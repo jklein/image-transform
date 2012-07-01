@@ -12,15 +12,41 @@
 include('simple_html_dom.php');
 
 
+/**
+ * This function takes in a URL that is either absolute or relative, and makes it absolute based on the provided base url
+ *
+ * @param string $base_url The base URL that we want to prepend to any relative URLs
+ * @param string $url      The provided URL that could be either absolute or relative
+ *
+ * @return string An absolute URL with the correct protocol (http/https)
+ */
+function make_url_absolute($base_url, $relative_url) {
+  if (substr($relative_url, 0, 4) === 'http') {
+    // In this case the URL is already absolute, so we just return it
+    return $relative_url;
+  } else {
+    $base_url_scheme = parse_url($base_url, PHP_URL_SCHEME);
+    $base_url_host = parse_url($base_url, PHP_URL_HOST);
+    $base_url_path = substr(parse_url($base_url, PHP_URL_PATH), 0, strrpos(parse_url($base_url, PHP_URL_PATH), '/'));
+
+    if (substr($relative_url, 0, 1) === '/') {
+      return $base_url_scheme . '://' . $base_url_host . $relative_url;
+    } else {
+      return $base_url_scheme . '://' . $base_url_host . $base_url_path . '/' . $relative_url;
+    }
+  }
+}
+
+
 // Initialize some variables
 $errors = array();
 $error_string = '';
-$img_src_array = array();
 $url = '';
 $filter = '';
 $html = '';
 $cache_hit = false;
 $allowed_img_extentions = array('.jpg', '.jpeg', '.png', '.gif');
+
 
 // See if the user has submitted the page
 if (!empty($_POST['submit'])) {
@@ -63,19 +89,19 @@ if (!empty($_POST['submit'])) {
         $element->href = '';
       }
 
+      // Make any CSS link tags point to absolute URLs so they still work after we download the code:
+      foreach ($html->find('link') as $element) {
+        $new_href = make_url_absolute($url, $element->href);
+
+        // Assign the new href to this link tag
+        $element->href = $new_href;
+      }
+
       // Find all of the images on the page and process them
       foreach ($html->find('img') as $image_element) {
 
-        // See if we are dealing with a relative image path
-        if (substr($image_element->src, 0, 4) !== 'http') {
-          if (substr($image_element->src, 0, 1) === '/') {
-            $url_to_curl = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST) . $image_element->src;
-          } else {
-            $url_to_curl = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST) . parse_url($url, PHP_URL_PATH) . '/' . $image_element->src;
-          }
-        } else {
-          $url_to_curl = $image_element->src;
-        }
+        // Make sure we have an absolute URL to the image that we want to curl
+        $url_to_curl = make_url_absolute($url, $image_element->src);
 
         // Curl the image so we can write it to disk and run some ImageMagick commands against it
         $ch = curl_init($url_to_curl);
@@ -88,7 +114,15 @@ if (!empty($_POST['submit'])) {
         // Hash the URL we are curling to get a unique filename for each image.
         // This solves the case of images with the same name but with different paths
         $image_file_name = md5($url_to_curl);
-        $image_extension = substr($url_to_curl, strrpos($url_to_curl, '.'));
+
+        // If the image has a query string we need to handle that
+        if (($query_string_pos = strrpos($url_to_curl, '?')) !== false) {
+          $image_query_string = substr($url_to_curl, $query_string_pos);
+          $image_extension = substr($url_to_curl, strrpos($url_to_curl, '.'), $query_string_pos - strrpos($url_to_curl, '.'));
+        } else {
+          $image_query_string = '';
+          $image_extension = substr($url_to_curl, strrpos($url_to_curl, '.'));
+        }
 
         // If the image extension isn't one of the allowed ones we will just go to the next iteration in the loop
         // This prevents things like trying to apply a filter to a beacon that has no file extension
@@ -124,14 +158,7 @@ if (!empty($_POST['submit'])) {
         $processed_image->writeImage($folder_path . '/' . $image_file_name . '_processed' . $image_extension);
 
         // Populate our image array with the path to both the old and new images
-        $img_src_array[$image_element->src] = '/' . $folder_name . '/' . $image_file_name . '_processed' . $image_extension;
-      }
-
-
-      // At this point we should have all of the images downloaded, processed, and written to disk.
-      // Now we just need to replace the source attributes in the HTML with the paths to the new images we have created:
-      foreach ($img_src_array as $old_src => $new_src) {
-        $html = str_replace($old_src, $new_src, $html);
+        $image_element->src = '/' . $folder_name . '/' . $image_file_name . '_processed' . $image_extension;
       }
 
       // Write the HTML to disk to cache this request
