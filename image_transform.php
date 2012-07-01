@@ -1,7 +1,7 @@
 <?php
 /**
  * This page allows you specify a URL and one of the allowed image transforms, and it will then
- * fetch that URL and perform the transformation on every image on the page in an <img> tag
+ * fetch that URL and perform the filter on every image on the page in an <img> tag
  *
  * PHP version 5
  *
@@ -14,7 +14,9 @@ include('simple_html_dom.php');
 
 // Initialize some variables
 $errors = array();
+$error_string = '';
 $img_src_array = array();
+$url = '';
 $html = '';
 $cache_hit = false;
 $allowed_img_extentions = array('.jpg', '.png', '.gif');
@@ -25,21 +27,22 @@ if (!empty($_POST['submit'])) {
   // Validate the input URL
   if (!filter_var($_POST['url'], FILTER_VALIDATE_URL)) {
     $errors['url'] = 'Please enter a valid URL of the form http://www.example.org';
+    $url = '';
   }
 
-  // Make sure they selected a transformation
-  if (empty($_POST['transformation'])) {
-    $errors['transformation'] = 'Please select a transformation you want to do on the images in the specified URL';
+  // Make sure they selected a filter
+  if (empty($_POST['filter'])) {
+    $errors['filter'] = 'Please select a filter you want to do on the images in the specified URL';
   }
 
-  // If we don't have any errors then let's fetch the URL and do the transformation
+  // If we don't have any errors then let's fetch the URL and do the filter
   if (empty($errors)) {
 
     // set URL and other appropriate options
     $url = $_POST['url'];
 
     // Make a directory for this hostname (if it doesn't already exist) that will contain the images we download
-    $folder_name = str_replace('.', '', parse_url($url, PHP_URL_HOST));
+    $folder_name = str_replace('.', '', parse_url($url, PHP_URL_HOST)) . '_' . $_POST['filter'];
     $folder_path = '/var/www/' . $folder_name;
     if (!file_exists($folder_path)) {
       mkdir($folder_path);
@@ -52,7 +55,7 @@ if (!empty($_POST['submit'])) {
       // Get the HTML from the URL (this function is from simple_html_dom.php)
       $html = file_get_html($url);
 
-      //Make sure we blow away a <base> tag if there is one, since it will mess up our relative image paths
+      //Make sure we blow away any <base> tag's href if there is one, since it will mess up our relative image paths
       foreach ($html->find('base') as $element) {
         $element->href = '';
       }
@@ -103,7 +106,18 @@ if (!empty($_POST['submit'])) {
         // Now that we have the image on disk let's open it up, transform it, and write it back with a new name
         $image = new Imagick($path_to_image);
         $processed_image = $image->clone();
-        $processed_image->flipImage();
+
+        // Do the filter based on what was passed in
+        if ($_POST['filter'] === 'flipx') {
+          $processed_image->flipImage();
+        } elseif ($_POST['filter'] === 'flipy') {
+          $processed_image->flopImage();
+        } elseif ($_POST['filter'] === 'blur') {
+          $processed_image->blurImage(5,3);
+        } elseif ($_POST['filter'] === 'gray') {
+          $processed_image->modulateImage(100,0,100);
+        }
+
         $processed_image->writeImage($folder_path . '/' . $image_file_name . '_processed' . $image_extension);
 
         // Populate our image array with the path to both the old and new image
@@ -123,7 +137,11 @@ if (!empty($_POST['submit'])) {
       fclose($fp);
     }
   } else {
-    print_r($errors);
+    $error_string = '<div class="errors">';
+    foreach ($errors as $error_name => $val) {
+      $error_string .= $val . '<br/>';
+    }
+    $error_string .= '</div>';
   }
 }
 
@@ -175,18 +193,35 @@ if (!empty($_POST['submit'])) {
         margin-right:25px;
         width:300px;
       }
+
+      .errors {
+        border:1px solid #yellow;
+        color:yellow;
+        padding:10px;
+      }
     </style>
   </head>
   <body>
     <div class="header_form">
+      <?=$error_string;?>
       <form method="post" action="<?=$_SERVER['SCRIPT_NAME'];?>">
         URL To Fetch:
-        <input type="url" value="" name="url" placeholder="http://www.example.org" class="url" />
+        <input type="url" value="<?=$url;?>" name="url" placeholder="http://www.example.org" class="url" />
 
         Filter to Apply:
-        <select name="transformation">
-          <option value="flip">Flip along x-axis (vertical flip)</option>
-          <option value="gray">Convert Images to grayscale</option>
+        <select name="filter">
+          <option value="flipx" <?=($_POST['filter'] == 'flipx' ? 'selected' : '');?>>
+            Flip along x-axis (vertical flip)
+          </option>
+          <option value="flipy" <?=($_POST['filter'] == 'flipy' ? 'selected' : '');?>>
+            Flip along y-axis (horizontal flip)
+          </option>
+          <option value="blur" <?=($_POST['filter'] == 'blur' ? 'selected' : '');?>>
+            Blur the images
+          </option>
+          <option value="gray" <?=($_POST['filter'] == 'gray' ? 'selected' : '');?>>
+            Convert Images to grayscale
+          </option>
         </select>
         <input type="submit" value="submit" name="submit" />
       </form>
