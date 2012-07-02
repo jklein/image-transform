@@ -25,7 +25,7 @@ Known Issues
 * The script currently only supports three file types (but they are the most common by far)
 * This only works for img tags, not CSS background images or images fetched by JS
 * This will not work for data URIs
-* This is probably the least secure application I have ever written.  There are TONS of security vulnerabilities
+* There are a TON of security vulnerabilities in this app.  I figured it wasn't worth patching them at this point, but I certainly could if it became necessary.
 * As more URLs get hit I never clean up the disk, so we will get a proliferation of folders over time
 * This is intentionally not MVC, I wanted to keep everything in one file for ease of review.
 * In a similar vein, this is why I inlined the CSS, and why I am just including the YUI3 reset file with a link tag.  I know this isn't the best practice from a performance point of view, but I wanted to keep the code as easy to review as possible.
