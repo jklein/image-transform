@@ -21,9 +21,13 @@ include('simple_html_dom.php');
  * @return string An absolute URL with the correct protocol (http/https)
  */
 function make_url_absolute($base_url, $relative_url) {
+  // Replace any spaces out of the relative url
+  // Not doing a full urlencode here b/c encoding only the characters we want to encode gets complicated
+  $relative_url = str_replace(' ', '%20', $relative_url);
+
   if (substr($relative_url, 0, 4) === 'http') {
-    // In this case the URL is already absolute, so we just replace any spaces return it
-    return str_replace(' ', '%20', $relative_url);
+    // In this case the URL is already absolute, so we just return it
+    return $relative_url;
   } else {
     $base_url_scheme = parse_url($base_url, PHP_URL_SCHEME);
     $base_url_host = parse_url($base_url, PHP_URL_HOST);
