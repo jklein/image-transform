@@ -32,6 +32,7 @@ Known Issues
 * Because the HTML from the page being curled is simply echoed to the screen, the page inherits whatever CSS that URL has, which can negatively impact the layout of the header that I created.
 * The favicon gets screwed up because of browser caching and the favicon tags in the source documents that we are curling
 * If the JS is referenced from a relative URL then we will lose it in the processed page. I fixed this issue for CSS, but I am intentionally skipping it for JS.  Hey, it should make the page faster :-).
+* I've found some sites that have query strings on their image URLs that determine what size the image will be.  When I curl these URLs I get the no-querystring version of the image.  Not going to worry about this at the moment since it is a pretty rare edge case.
 
 
 

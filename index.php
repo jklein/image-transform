@@ -22,8 +22,8 @@ include('simple_html_dom.php');
  */
 function make_url_absolute($base_url, $relative_url) {
   if (substr($relative_url, 0, 4) === 'http') {
-    // In this case the URL is already absolute, so we just return it
-    return $relative_url;
+    // In this case the URL is already absolute, so we just replace any spaces return it
+    return str_replace(' ', '%20', $relative_url);
   } else {
     $base_url_scheme = parse_url($base_url, PHP_URL_SCHEME);
     $base_url_host = parse_url($base_url, PHP_URL_HOST);
@@ -107,7 +107,8 @@ if (!empty($_POST['submit'])) {
         $ch = curl_init($url_to_curl);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_BINARYTRANSFER,1);
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
         $rawdata = curl_exec($ch);
         curl_close ($ch);
 
@@ -126,7 +127,7 @@ if (!empty($_POST['submit'])) {
 
         // If the image extension isn't one of the allowed ones we will just go to the next iteration in the loop
         // This prevents things like trying to apply a filter to a beacon that has no file extension
-        if (!in_array($image_extension, $allowed_img_extentions)) {
+        if (!in_array(strtolower($image_extension), $allowed_img_extentions)) {
           continue;
         }
 
