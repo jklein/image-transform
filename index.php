@@ -143,7 +143,7 @@ if (!empty($_POST['submit'])) {
         // Wrap this in a try/catch since sometimes sites have malformed images that ImageMagick can't open
         try {
           $image = new Imagick($path_to_image);
-          $processed_image = $image->clone();
+          $processed_image = clone $image;
 
           // Do the filter based on what was passed in
           if ($filter === 'flipx') {
