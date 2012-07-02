@@ -76,7 +76,7 @@ if (!empty($_POST['submit'])) {
     // Make a directory for this URL and filter (if it doesn't already exist) that will contain the images we download
     // I'm hashing it to keep the length consistent, and also to easily take care of any special characters in the URL
     $folder_name = md5($url . $filter);
-    $folder_path = '/var/www/' . $folder_name;
+    $folder_path = '/var/www/cache/' . $folder_name;
     if (!file_exists($folder_path)) {
       mkdir($folder_path);
     } else {
@@ -114,26 +114,23 @@ if (!empty($_POST['submit'])) {
         curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 2);
         $rawdata = curl_exec($ch);
+        $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         curl_close ($ch);
 
         // Hash the URL we are curling to get a unique filename for each image.
         // This solves the case of images with the same name but with different paths
         $image_file_name = md5($url_to_curl);
 
-        // If the image has a query string we need to handle that
-        if (($query_string_pos = strrpos($url_to_curl, '?')) !== false) {
-          $image_query_string = substr($url_to_curl, $query_string_pos);
-          $image_extension = substr($url_to_curl, strrpos($url_to_curl, '.'), $query_string_pos - strrpos($url_to_curl, '.'));
-        } else {
-          $image_query_string = '';
-          $image_extension = substr($url_to_curl, strrpos($url_to_curl, '.'));
-        }
-
-        // If the image extension isn't one of the allowed ones we will just go to the next iteration in the loop
-        // This prevents things like trying to apply a filter to a beacon that has no file extension
-        if (!in_array(strtolower($image_extension), $allowed_img_extentions)) {
-          continue;
-        }
+       // Add the right extension based on the content type
+       if ($content_type === 'image/jpeg') {
+         $image_extension = '.jpg';
+       } elseif ($content_type === 'image/gif') {
+         $image_extension = '.gif';
+       } elseif ($content_type === 'image/png') {
+         $image_extension = '.png';
+       } else {
+         continue;
+       }
 
         // Create the path that we are going to write the image to
         $path_to_image = $folder_path . '/' . $image_file_name . $image_extension;
@@ -165,7 +162,7 @@ if (!empty($_POST['submit'])) {
           $processed_image->writeImage($folder_path . '/' . $image_file_name . '_processed' . $image_extension);
 
           // Populate our image array with the path to both the old and new images
-          $image_element->src = '/' . $folder_name . '/' . $image_file_name . '_processed' . $image_extension;
+          $image_element->src = '/cache/' . $folder_name . '/' . $image_file_name . '_processed' . $image_extension;
         } catch (Exception $e) {
           error_log($e);
         }
