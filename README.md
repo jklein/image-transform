@@ -1,4 +1,3 @@
-===============
 Overview
 ===============
 This is a small tool that allows you to apply an ImageMagick filter to all images on a specified web page.  When the URL is submitted, the page parses the DOM using Simple HTML DOM, a PHP class that I got from http://simplehtmldom.sourceforge.net/.  Then it curls all of the images individually, writes them to disk, runs the filter on them, and rewrites the HTML source of the URL to reference the local images.
@@ -6,7 +5,6 @@ This is a small tool that allows you to apply an ImageMagick filter to all image
 There is a pretty trivial caching system in place - if you hit the same URL with the same filter you will get a cached HTML page and you will use images that have already been filtered.
 
 
-===============
 Requirements
 ===============
 * PHP 5.3+ (could work with older versions, but they were not tested)
@@ -17,7 +15,6 @@ Requirements
 * Apache 2
 
 
-===============
 Known Issues
 ===============
 * Encoding can get a little screwed up if special characters exist.  Since I am serving the document as UTF-8, if the source page has a different encoding we can get into trouble.
@@ -35,8 +32,6 @@ Known Issues
 * I've found some sites that have query strings on their image URLs that determine what size the image will be.  When I curl these URLs I get the no-querystring version of the image.  Not going to worry about this at the moment since it is a pretty rare edge case.
 
 
-
-===============
 Features to Add
 ===============
 * Make the call with Ajax and show a busy indicator on the page with a "processing..." message or something
